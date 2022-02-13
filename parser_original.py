@@ -10,26 +10,27 @@ def output_in_json(process_name, threads_list, task_context_collection):
     trace_events = []
     for i in threads_list:
         name_of_label = "["+ i +"] " + process_name
-        trace_events.append({"ts": 0, "ph":"M", "pid": "47122", "name": "process_name", "args":{ "name": name_of_label }})
-        trace_events.append({"ts": 0, "ph":"M", "pid": "47122", "name": "thread_name", "args" : { "name": name_of_label }})
+        trace_events.append({"ts": 0, "ph":"M", "pid": i, "name": "process_name", "args":{ "name": name_of_label }})
+        trace_events.append({"ts": 0, "ph":"M", "pid": i, "name": "thread_name", "args" : { "name": name_of_label }})
     for i in task_context_collection:    # Parse each events (28935.835212436  28875: [exit ] block_example::async_main::_{{closure}}(559bb1696e3e) depth: 37)
-        timestamp = re.findall("(.*)  ", i) 
+        timestamp = re.findall("(.*)  ", i)
+        timestamp_m = float(timestamp[0]) * 1000000
         pid = threads_list[0]
         tid = re.findall("  (.*): \[", i)
         symbol_name = re.findall("\] (.*)\(", i)
         location = find_location(i)
         status = re.findall("\[(.*)\]", i)
         if status[0] == 'entry':
-            if tid != pid:    
-                trace_events.append({"ts": timestamp[0], "ph": "B", "pid": pid, "name": symbol_name[0], "tid": tid[0], "args": {"location": location}})
+            if tid[0] != pid:    
+                trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "tid": tid[0], "name": symbol_name[0], "args": {"location": location}})
             else:    # Main thread
-                trace_events.append({"ts": timestamp[0], "ph": "B", "pid": pid, "name": symbol_name[0], "args": {"location": location}})
+                trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "name": symbol_name[0], "args": {"location": location}})
         else:
-            if tid != pid:    
-                trace_events.append({"ts": timestamp[0], "ph": "E", "pid": pid, "name": symbol_name[0], "tid": tid[0], "args": {"location": location}})
+            if tid[0] != pid:    
+                trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "tid": tid[0], "name": symbol_name[0], "args": {"location": location}})
             else:    # Main thread
-                trace_events.append({"ts": timestamp[0], "ph": "E", "pid": pid, "name": symbol_name[0], "args": {"location": location}})
-    data = {"traceEvents": trace_events, "displayTimeUnit": "ns"} 
+                trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "name": symbol_name[0], "args": {"location": location}})
+    data = {"traceEvents": trace_events, "displayTimeUnit": "ms"} 
     jsonstring = json.dumps(data)
     jsonfile = open("data.json", "w")
     jsonfile.write(jsonstring)
@@ -39,7 +40,7 @@ def find_location(task_context):                       # find the location of th
     symbol_m = re.sub("\.\.", "::", symbol[0])         # we need to modify the symbol generated from uftrace
     symbol_m = re.sub("_<", "<", symbol_m) 
     symbol_m = re.sub("_{", "{", symbol_m)
-    output = subprocess.Popen('objdump -C --disassemble="'+ symbol_m +'" -l block_example | grep -e"<' + symbol_m + '>" -A 2', shell=True, stdout=subprocess.PIPE)  #TODO: remember to replace the process name
+    output = subprocess.Popen('objdump -C --disassemble="'+ symbol_m +'" -l '+ process_name +' | grep -e"<' + symbol_m + '>" -A 2', shell=True, stdout=subprocess.PIPE)  #TODO: remember to replace the process name
     output_return = output.stdout.read().decode('utf-8')
     buf = io.StringIO(output_return)
     symbol_demangled = buf.readline()
