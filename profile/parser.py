@@ -14,7 +14,11 @@ def output_in_json(process_name, threads_list, task_context_collection, output_n
         trace_events.append({"ts": 0, "ph":"M", "pid": i, "name": "thread_name", "args" : { "name": name_of_label }})
     for i in task_context_collection:    # Parse each events (28935.835212436  28875: [exit ] block_example::async_main::_{{closure}}(559bb1696e3e) depth: 37)
         if not re.search("::main::main::_{{closure}}\(", i):
+            function_address = ""
             timestamp = re.findall("(.*)  ", i)
+            if timestamp[0][0] == "T":
+                function_address = re.findall("\((.*)\)", i)[0]
+                timestamp[0] = timestamp[0].replace("T","")
             timestamp_m = float(timestamp[0]) * 1000000
             pid = threads_list[0]
             tid = re.findall("  (.*): \[", i)
@@ -23,15 +27,22 @@ def output_in_json(process_name, threads_list, task_context_collection, output_n
             location = find_location(i)
             status = re.findall("\[(.*)\]", i)
             if status[0] == 'entry':
-                if tid[0] != pid:    
+                if tid[0] != pid:
                     trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"location": location}})
                 else:    # Main thread
                     trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "name": symbol_m, "args": {"location": location}})
             else:
-                if tid[0] != pid:    
-                    trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"location": location}})
-                else:    # Main thread
-                    trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "name": symbol_m, "args": {"location": location}})
+                if function_address != "":
+                    if tid[0] != pid:
+                        trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"location": location, "Task (top-level future)": "function address: 0x"+function_address}})
+                    else:    # Main thread
+                        trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "name": symbol_m, "args": {"location": location, "Task (top-level future)": "function address: 0x"+function_address}})
+                else:
+                    if tid[0] != pid:
+                        trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"location": location}})
+                    else:    # Main thread
+                        trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "name": symbol_m, "args": {"location": location}})
+
     data = {"traceEvents": trace_events, "displayTimeUnit": "ms"} 
     jsonstring = json.dumps(data)
     jsonfile = open(output_name, "w")
@@ -51,7 +62,6 @@ def find_location(task_context):                       # find the location of th
     return location
 def symbol_modification(task_symbol):
     task_symbol = re.sub("::main::main","::main", task_symbol)
-    print(task_symbol)
     if re.search(re.escape("async_std..task..join_handle..JoinHandle"), task_symbol):     # join_handle future
         return "join_handle_future"
     elif re.search("^async_std::", task_symbol):    # async_std future
@@ -89,7 +99,7 @@ for line in fp:
     if find_task_state == 1 and re.search("entry.*_<core..future..from_generator..GenFuture<T> as core..future..future..Future>::poll.*depth: "+str(polled_task_context_depth), line):
         find_task_state = 2
         #print("1")
-    if find_task_state == 1 and re.search("entry] _<async_std..task..join_handle..JoinHandle<T> as core..future..future..Future>::poll", line):
+    if find_task_state == 1 and re.search("entry] _<async_std..task..join_handle..JoinHandle<T> as core..future..future..Future>::poll", line): # task context (join_handle case)
         task_context_collection.append(line)
         get_future_name = re.findall("entry] (.*poll)", line)
         future_stack.append(str(get_future_name[0]))
@@ -102,7 +112,7 @@ for line in fp:
         In_task = str(get_task_name[0])    # When in the task state, it may encounter the inner futures or exit the task
         #print("2")
     if find_task_state == 3 and re.search(re.escape("exit ] "+In_task+"("), line):    #if there is no inner futures inside the task
-        task_context_collection.append(line)
+        task_context_collection.append("T"+line)
         find_task_state = 0
         #print("3")
     elif find_task_state == 3 and re.search("entry.*_<core..future..from_generator..GenFuture<T> as core..future..future..Future>::poll.*depth: ", line):    # if there are inner futures
@@ -152,6 +162,7 @@ for line in fp:
             find_task_state = 5
         elif last_state == 1:
             find_task_state = 0
+            task_context_collection[-1] = "T"+line
         elif last_state == 6:
             find_task_state = 6
         #print("7")
@@ -172,10 +183,11 @@ for line in fp:
         task_context_collection.append(line)
         #print("6")
     elif find_task_state == 6 and re.search(re.escape("exit ] "+In_task+"("), line):
-        task_context_collection.append(line)
+        task_context_collection.append("T"+line)
         find_task_state = 0
         #print("6")
 #for i in task_context_collection:
-#    print(i + "location:" + find_location(i) + "\n")
+#    print(i+"\n")
+#    #print(i + "location:" + find_location(i) + "\n")
 output_in_json(process_name, thread_list, task_context_collection, output_name)
 #print(thread_list)
