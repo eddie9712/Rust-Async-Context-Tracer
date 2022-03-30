@@ -63,9 +63,6 @@ def symbol_modification(task_symbol):
     elif re.search("(.*)::_{{closure}}", task_symbol):    # compiler generated future
         modified_symbo = re.findall("(.*)::_{{closure}}", task_symbol)
         return modified_symbo[0]
-    elif re.search("(.*) as core..future..future", task_symbol):
-        modified_symbol = re.findall("_<(.*) as core..future", task_symbol)
-        return modified_symbol[0]
     
 task_context_collection = []        # To collect all polling contexts of tasks
 future_stack = []                   # Record the future name to pair
@@ -87,14 +84,21 @@ for line in fp:
     
     # State 0
     if find_task_state == 0 and re.search("entry] _<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}",line):
+        task_context_collection.append(line)
+        get_future_name = re.findall("entry] (.*::_{{closure}})", line)
+        future_stack.append(str(get_future_name[0])+"@0")
         find_task_state = 1
-    
+
     # State 1
     if find_task_state == 1 and re.search("entry] _<core..future..from_generator..GenFuture<T> as core..future..future..Future>::poll.*depth: ", line):
         get_future_depth = re.findall("depth: [0-9]*", line)
         polled_future_number = int(re.split('\s', get_future_depth[0])[1])
         find_task_state = 2
-    
+    elif find_task_state == 1 and future_stack and re.search(re.escape("exit ] _<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}"), line):
+        task_context_collection.append(line)
+        find_task_state = int(re.split("@", future_stack[-1])[1])
+        future_stack.pop()
+
     # State 2
     if find_task_state == 2 and re.search("entry.*::_{{closure}}.*depth: "+str(polled_future_number+1), line):    #find future polling
         task_context_collection.append(line)
@@ -111,6 +115,12 @@ for line in fp:
         get_future_depth = re.findall("depth: [0-9]*", line)
         polled_future_number = int(re.split('\s', get_future_depth[0])[1])
         find_task_state = 2
+    elif find_task_state == 3 and re.search("entry] _<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}", line):
+        #print("HI")
+        task_context_collection.append(line)
+        get_future_name = re.findall("entry] (.*::_{{closure}})", line)
+        future_stack.append(str(get_future_name[0])+"@3")
+        find_task_state = 1
     
     # State 4
     if find_task_state == 4 and re.search("entry.*_<core..future..from_generator..GenFuture<T> as core..future..future..Future>::poll.*depth: ", line):
@@ -122,13 +132,19 @@ for line in fp:
         #print(line)
         future_stack.pop()
         task_context_collection.append(line)
-    elif find_task_state == 4 and re.search("exit ] _<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}", line):
-        find_task_state = 0
- 
+    elif find_task_state == 4 and re.search("entry] _<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}",line):
+        task_context_collection.append(line)
+        get_future_name = re.findall("entry] (.*::_{{closure}})", line)
+        future_stack.append(str(get_future_name[0])+"@4")
+        find_task_state = 1
+    elif find_task_state == 4 and future_stack and re.search(re.escape("exit ] _<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}"), line):
+        task_context_collection.append(line)
+        find_task_state = int(re.split("@", future_stack[-1])[1])
+        future_stack.pop()
 
 #   Section for debugging or output json file
-for i in task_context_collection:
-    print(i+"\n")
+#for i in task_context_collection:
+#   print(i+"\n")
 #    print(i + "location:" + find_location(i) + "\n")
-#output_in_json(process_name, thread_list, task_context_collection, output_name)
+output_in_json(process_name, thread_list, task_context_collection, output_name)
 #
