@@ -53,7 +53,12 @@ And We can have a visualization for our rust asynchronous program:
  * Result example:  
 ![image](https://user-images.githubusercontent.com/37073963/160839516-825f3e73-763b-4e73-84fe-e2ab433e6330.png)  
 
- 
+ ## TODO:
+ * The data types that implement future trait should be recognized (I call them user-defined futures)
+ * Different task(future) instances should be recognized
+ * Combinators(e.g. `join!`, `select!`) issues
+ * Some speed up for parsing and recording are neeeded
+  
  ## License:
  * MIT license (http://opensource.org/licenses/MIT)
  
