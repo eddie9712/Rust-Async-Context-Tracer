@@ -1,7 +1,5 @@
 use async_std::task;
 use std::time::Duration;
-//use tracing::{debug, Level, instrument};
-//use tracing_subscriber::fmt::format::FmtSpan;
 use std::thread;
 use futures::join;
 
@@ -15,7 +13,6 @@ fn calculate_pi(N: u64) -> f64{
     }
     pi * 4.0
 }
-//#[instrument]
 async fn inner_future1(){
     task::sleep(Duration::from_millis(50)).await;
 }
@@ -25,18 +22,13 @@ async fn inner_future2(){
 async fn inner_future3(){
     println!("Do nothing");
 }
-//#[instrument]
-async fn blocking_future(){
+async fn blocking_future(){     // Detect blocking on this future (abnormal polling time)
     println!("I will block the task!");
     let pi = calculate_pi(500000);    // CPU-bound task 
     thread::sleep(Duration::from_millis(20));   //simulate a blocking I/O operation
 }
 #[async_std::main] 
 async fn main(){
-    /*tracing_subscriber::fmt()              //declare a tracing subscriber
-    .with_max_level(tracing::Level::DEBUG)
-    .with_span_events(FmtSpan::FULL)
-    .init();*/
 
     // we have 3 tasks in total
     let handle1 = task::spawn(async {   //spawn task 1
