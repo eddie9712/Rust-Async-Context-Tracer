@@ -55,7 +55,7 @@ def find_location(task_context):                       # find the location of th
     return location
 def symbol_modification(task_symbol):
     task_symbol = re.sub("::main::main","::main", task_symbol)
-    if re.search(re.escape("async_std..task..join_handle..JoinHandle"), task_symbol):     # join_handle future
+    if re.search(re.escape("async_std..task..join_handle..JoinHandle"), task_symbol):     # join_handle future(Not provide yet)
         return "join_handle_future"
     elif re.search("^async_std::", task_symbol):    # async_std future
         modified_symbol = re.findall("^(.*)::_{{closure}}", task_symbol)
@@ -68,7 +68,6 @@ task_context_collection = []        # To collect all polling contexts of tasks
 future_stack = []                   # Record the future name to pair
 find_task_state = 0                 # Record the state of finding task context
 polled_future_number = 0
-last_state = 0                      # To record the last state for the seventh state 
 thread_list = []
 process_name = ""
 output_name = ""
@@ -116,7 +115,6 @@ for line in fp:
         polled_future_number = int(re.split('\s', get_future_depth[0])[1])
         find_task_state = 2
     elif find_task_state == 3 and re.search("entry] _<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}", line):
-        #print("HI")
         task_context_collection.append(line)
         get_future_name = re.findall("entry] (.*::_{{closure}})", line)
         future_stack.append(str(get_future_name[0])+"@3")
@@ -127,9 +125,7 @@ for line in fp:
         get_future_depth = re.findall("depth: [0-9]*", line)
         polled_future_number = int(re.split('\s', get_future_depth[0])[1])
         find_task_state = 2
-        #print("6") 
     elif find_task_state == 4 and future_stack and re.search(re.escape("exit ] "+future_stack[-1]+"("), line):
-        #print(line)
         future_stack.pop()
         task_context_collection.append(line)
     elif find_task_state == 4 and re.search("entry] _<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}",line):
