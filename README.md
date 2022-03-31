@@ -61,7 +61,7 @@ And We can have a visualization for our rust asynchronous program:
  * Different task(future) instances should be recognized
  * Combinators(e.g. `join!`, `select!`) issues
  * Speed up for parsing and recording are neeeded
- * Annotated different tasks with different colors
+ * Annotate different tasks with different colors
  ## License:
  * MIT license (http://opensource.org/licenses/MIT)
  
