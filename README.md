@@ -37,7 +37,8 @@ And We can have a visualization for our rust asynchronous program:
 * Move the profile directory into your `target` directory
  ```
  profile
- ├── parser.py
+ ├── parser_nu.py (default)
+ ├── parser.py (Not support yet)
  └── profile.sh
  ```
 * Run the profiler script:  
@@ -45,6 +46,7 @@ And We can have a visualization for our rust asynchronous program:
 * After executing the script, we get a json file in the profile directory  
  ```
  profile
+ ├── parser_nu.py
  ├── parser.py
  └── profile.sh
  └── $OUTPUT_FILE_NAME.json
