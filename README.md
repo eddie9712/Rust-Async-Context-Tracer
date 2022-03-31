@@ -13,7 +13,8 @@ RUSTFLAGS="-Z instrument-mcount" cargo build
 ## What is a profiling tool for asynchronous rust?
 * With this tool, we can:
    * Understand the behavior of rust asynchronous tasks, including the polling time of the futures and the waiting time of the futures
-   * Find out some abnormal execution pattern (long polling time may cause [blocking](https://ryhl.io/blog/async-what-is-blocking/))
+   * Find out some abnormal execution patterns (long polling time may cause [blocking](https://ryhl.io/blog/async-what-is-blocking/))
+   * 
 * e.g. Here is a simple rust asynchronous program:
 ```
 use async_std::task;
@@ -60,7 +61,7 @@ And We can have a visualization for our rust asynchronous program:
  * Different task(future) instances should be recognized
  * Combinators(e.g. `join!`, `select!`) issues
  * Speed up for parsing and recording are neeeded
-  
+ * Annotated different tasks with different colors
  ## License:
  * MIT license (http://opensource.org/licenses/MIT)
  
