@@ -10,5 +10,6 @@ else
         cd ./profile
         echo "Start parsing.."
         python3 parser_nu.py $1 $2
-        echo "Output the result to the json file!" 
+        echo "Output the result to the json file!"
+        rm ./dumped_data.txt  
 fi

@@ -128,10 +128,7 @@ for line in fp:
         get_future_depth = re.findall("depth: [0-9]*", line)
         polled_future_number = int(re.split('\s', get_future_depth[0])[1])
         find_task_state = 2
-        #print("6") 
     elif find_task_state == 4 and future_stack and re.search(re.escape("exit ] "+re.split("@",future_stack[-1])[0]+"("), line):
-        #print(line)
-        #print(line)
         future_stack.pop()
         task_context_collection.append(line)
         if re.search("exit ] _<.* as core..future..future..Future>::poll\(", line):
