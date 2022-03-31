@@ -11,7 +11,9 @@ e.g.(In `nightly-2021-03-16-x86_64-unknown-linux-gnu`)
 RUSTFLAGS="-Z instrument-mcount" cargo build
 ```
 ## What is a profiling tool for asynchronous rust?
-* Understand the behavior of your rust asynchronous tasks, including the polling time of the futures and the waiting time of the futures
+* With this tool, we can:
+   * Understand the behavior of rust asynchronous tasks, including the polling time of the futures and the waiting time of the futures
+   * Find out some abnormal execution pattern (long polling time may cause [blocking](https://ryhl.io/blog/async-what-is-blocking/))
 * e.g. Here is a simple rust asynchronous program:
 ```
 use async_std::task;
