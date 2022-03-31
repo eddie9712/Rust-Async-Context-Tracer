@@ -57,7 +57,7 @@ And We can have a visualization for our rust asynchronous program:
  * The data types that implement future trait should be recognized (I call them user-defined futures)
  * Different task(future) instances should be recognized
  * Combinators(e.g. `join!`, `select!`) issues
- * Some speed up for parsing and recording are neeeded
+ * Speed up for parsing and recording are neeeded
   
  ## License:
  * MIT license (http://opensource.org/licenses/MIT)
