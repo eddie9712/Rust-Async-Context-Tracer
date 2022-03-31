@@ -48,7 +48,7 @@ And We can have a visualization for our rust asynchronous program:
  profile
  ├── parser_nu.py
  ├── parser.py
- └── profile.sh
+ ├── profile.sh
  └── $OUTPUT_FILE_NAME.json
  ```  
  * Then we can use the trace-viewer to visualize the result:
