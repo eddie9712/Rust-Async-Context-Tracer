@@ -9,7 +9,7 @@ else
         mv ./dumped_data.txt ./profile/
         cd ./profile
         echo "Start parsing.."
-        python3 parser_nu.py $1 $2
+        python3 parser_tokio.py $1 $2
         echo "Output the result to the json file!"
         rm ./dumped_data.txt  
 fi
