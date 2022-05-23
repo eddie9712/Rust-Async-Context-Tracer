@@ -166,7 +166,7 @@ for line in fp:
                     future_stack.append(str(get_future_name[0])+"@4")
                     find_task_state = 5
     
-    elif find_task_state == 5:      # State for recognizing the user-defined futures
+    elif find_task_state == 5:      # State for recognizing the user-implemented futures
         if re.search("entry.*_<core..future..from_generator..GenFuture<T> as core..future..future..Future>::poll.*depth: ", line):
             get_future_depth = re.findall("depth: [0-9]*", line)
             polled_future_number = int(re.split('\s', get_future_depth[0])[1])
