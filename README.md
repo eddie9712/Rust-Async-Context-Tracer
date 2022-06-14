@@ -66,6 +66,7 @@ And We can have a visualization for our rust asynchronous program:
  * Speed up for parsing and recording are neeeded
  * Annotate different tasks with different colors
  * Tracing progress should be done correctly in release mode
+ * Some locations information are wrong because of the same demangled symbol 
  ## License:
  * MIT license (http://opensource.org/licenses/MIT)
  
