@@ -44,9 +44,10 @@ And We can have a visualization for our rust asynchronous program:
 For tracing all futures:  
 `. profile.sh $EXECUTABLE_NAME $OUTPUT_FILE_NAME`  
 Tracing the compiler generated futures only:  
-`. profile.sh $EXECUTABLE_NAME $OUTPUT_FILE_NAME --generated-future`
+`. profile.sh $EXECUTABLE_NAME $OUTPUT_FILE_NAME --generated-future`  
+:warning: The function location of futures are not provided by default, you can pass argument `--get-location` to get locations. Note that if enable it, the progress will become very slow, see issue [#2](https://github.com/eddie9712/Rust-Async-Context-Tracer/issues/2). 
 * After executing the script, we get a json file in the profile directory  
- ```
+ ```   
  profile
  ├── parser_nu.py
  ├── parser.py
