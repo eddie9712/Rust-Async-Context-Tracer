@@ -11,10 +11,17 @@ else
         echo "Start parsing.."
         if [ "$3" = "--generated-future"]
         then
-            echo "(Tracing compiler-generated future only)" 
+            echo "(Tracing compiler-generated futures only)" 
             python3 parser_nu.py $1 $2
+        elif [ "$3" = "--get-location" ]
+        then
+            echo "(Tracing all futures, get locations for futures)"
+            python3 parser.py $1 $2 --get-location
+        elif ([ "$3" = "--generated-future" ] && ["$4" = "--get-location" ]) || ([ "$3" = "--get-location" ] && [ "$4" = "--generated-future" ] )
+        then
+            echo "(Tracing compiler-generated futures only, get locations for futures)"
+            python3 parser_nu.py $1 $2 --get-location
         else
-            echo "(Tracing all futures)"
             python3 parser.py $1 $2
         fi
         echo "Output the result to the json file!"

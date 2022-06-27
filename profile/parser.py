@@ -6,7 +6,7 @@ import sys
 
 fp = open('dumped_data.txt',"r")
 
-def output_in_json(process_name, threads_list, task_context_collection, output_name):
+def output_in_json(process_name, threads_list, task_context_collection, output_name, enable_getting_location):
     trace_events = []
     for i in threads_list:
         name_of_label = "["+ i +"] " + process_name
@@ -23,18 +23,30 @@ def output_in_json(process_name, threads_list, task_context_collection, output_n
             tid = re.findall("  (.*): \[", i)
             symbol_name = re.findall("\] (.*)\(", i)
             symbol_m = symbol_modification(symbol_name[0])
-            location = find_location(i)
             status = re.findall("\[(.*)\]", i)
-            if status[0] == 'entry':
-                if tid[0] != pid:
-                    trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"location": location}})
-                else:    # Main thread
-                    trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "name": symbol_m, "args": {"location": location}})
+            if enable_getting_location == 1:    # If it is enable, the parser will spend a lot of time for finding the location, this will be fixed in the future.
+                location = find_location(i)
+                if status[0] == 'entry':
+                    if tid[0] != pid:
+                        trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"location": location}})
+                    else:    # Main thread
+                        trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "name": symbol_m, "args": {"location": location}})
+                else:
+                    if tid[0] != pid:
+                        trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"location": location, "Function address (For recognizing anonymous type)": "0x"+function_address}})
+                    else:    # Main thread
+                        trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "name": symbol_m, "args": {"location": location, "Function address (For recognizing anonymous type)": "0x"+function_address}})
             else:
-                if tid[0] != pid:
-                    trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"location": location, "Function address (For recognizing anonymous type)": "0x"+function_address}})
-                else:    # Main thread
-                    trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "name": symbol_m, "args": {"location": location, "Function address (For recognizing anonymous type)": "0x"+function_address}})
+                if status[0] == 'entry':
+                        if tid[0] != pid:
+                            trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "tid": tid[0], "name": symbol_m})
+                        else:    # Main thread
+                            trace_events.append({"ts": timestamp_m, "ph": "B", "pid": pid, "name": symbol_m})
+                else:
+                        if tid[0] != pid:
+                            trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "tid": tid[0], "name": symbol_m, "args": {"Function address (For recognizing anonymous type)": "0x"+function_address}})
+                        else:    # Main thread
+                            trace_events.append({"ts": timestamp_m, "ph": "E", "pid": pid, "name": symbol_m, "args": {"Function address (For recognizing anonymous type)": "0x"+function_address}})
 
     data = {"traceEvents": trace_events, "displayTimeUnit": "ms"} 
     jsonstring = json.dumps(data)
@@ -68,11 +80,14 @@ polled_future_number = 0
 thread_list = []
 process_name = ""
 output_name = ""
+enable_getting_location = 0
 
 if sys.argv[1]:
     process_name = sys.argv[1]
 if sys.argv[2]:
     output_name = sys.argv[2]+".json"
+if len(sys.argv) == 4 and sys.argv[3] == "--get-location":
+    enable_getting_location = 1
 for line in fp:
     if re.search("reading (.*).dat", line): 
        threads = re.findall("reading (.*).dat", line)# record the threads that exist in the process
@@ -191,5 +206,5 @@ for line in fp:
 #for i in task_context_collection:
 #   print(i+"\n")
 #    print(i + "location:" + find_location(i) + "\n")
-output_in_json(process_name, thread_list, task_context_collection, output_name)
+output_in_json(process_name, thread_list, task_context_collection, output_name, enable_getting_location)
 #
