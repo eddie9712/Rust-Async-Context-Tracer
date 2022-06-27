@@ -9,7 +9,14 @@ else
         mv ./dumped_data.txt ./profile/
         cd ./profile
         echo "Start parsing.."
-        python3 parser_nu.py $1 $2
+        if [ "$3" = "--generated-future"]
+        then
+            echo "(Tracing compiler-generated future only)" 
+            python3 parser_nu.py $1 $2
+        else
+            echo "(Tracing all futures)"
+            python3 parser.py $1 $2
+        fi
         echo "Output the result to the json file!"
         rm ./dumped_data.txt  
 fi
