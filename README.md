@@ -14,7 +14,6 @@ RUSTFLAGS="-Z instrument-mcount -C passes=ee-instrument,post-inline-ee-instrumen
 * With this tool, we can:
    * Understand the behavior of rust asynchronous tasks, including the polling time of the futures and the waiting time of the futures
    * Find out some abnormal execution patterns (long polling time may cause [blocking](https://ryhl.io/blog/async-what-is-blocking/))
-   * 
 * e.g. Here is a simple rust asynchronous program:
 ```
 use async_std::task;
@@ -42,9 +41,9 @@ And We can have a visualization for our rust asynchronous program:
  └── profile.sh
  ```
 * Run the profiler script:  
-For tracing all futures:
-`. profile.sh $EXECUTABLE_NAME $OUTPUT_FILE_NAME`
-Tracing the compiler generated futures only:
+For tracing all futures:  
+`. profile.sh $EXECUTABLE_NAME $OUTPUT_FILE_NAME`  
+Tracing the compiler generated futures only:  
 `. profile.sh $EXECUTABLE_NAME $OUTPUT_FILE_NAME --generated-future`
 * After executing the script, we get a json file in the profile directory  
  ```
