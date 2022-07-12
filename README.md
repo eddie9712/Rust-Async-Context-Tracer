@@ -3,13 +3,7 @@
 ▶️New branch for tokio-runtime is working in progress
 ## Prerequisite:
 * Please install and build [uftrace](https://github.com/namhyung/uftrace) first
-* Make sure using the **rust toolchain that supports `mcount` call** (the `mcount` flag is temporarily broken and see [here](https://github.com/namhyung/uftrace/issues/1392) for a workaround)  
-and if the circumstances permit, you can just use the earlier toolchain (e.g. `nightly-2021-03-16-x86_64-unknown-linux-gnu`)
-* Build your executable in **debug mode**  
-In rust nightly build:
-```
-RUSTFLAGS="-Z instrument-mcount -C passes=ee-instrument,post-inline-ee-instrument" cargo build --bin $BINARY_NAME 
-```
+* Build your executable in **debug mode** 
 ## What is a tracing tool for asynchronous rust?
 * With this tool, we can:
    * Understand the behavior of rust asynchronous tasks, including the polling time of the futures and the waiting time of the futures
