@@ -4,7 +4,7 @@ then
 else
         cd ../
         echo "Start reocrding.."
-        uftrace record -F "_<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}" -N "core::ptr.*" -N "core::alloc.*" -N "core::mem.*" -N "core::sync.*" -N "core::str.*" -N "core::iter.*" -N "alloc.*" -N "core::slice.* " -N "core::core_arch.*" -N "core::pin.*" -N "core::cmp.*" $1 
+        uftrace record -P "_<async_std..task..builder..SupportTaskLocals<F> as core..future..future..Future>::poll::_{{closure}}" -P "_<core..future..from_generator..GenFuture<T> as core..future..future..Future>::poll" -P ".*::_\{\{closure\}\}" -P ".*as core..future..future..Future>::poll" $1
         uftrace dump > dumped_data.txt
         mv ./dumped_data.txt ./profile/
         cd ./profile
