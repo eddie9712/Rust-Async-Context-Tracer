@@ -103,10 +103,11 @@ for line in fp:
     # State 2
     elif find_task_state == 2: 
         if re.search("entry.*::_{{closure}}.*depth: "+str(polled_future_number+1), line):    #find future polling
-            task_context_collection.append(line)
-            get_future_name = re.findall("entry] (.*::_{{closure}})", line)
-            future_stack.append(str(get_future_name[0]))
-            find_task_state = 3
+            if not re.search("entry] _<core..future..from_generator..GenFuture<T> as core..future..future..Future>::poll.*depth: ", line):
+                task_context_collection.append(line)
+                get_future_name = re.findall("entry] (.*::_{{closure}})", line)
+                future_stack.append(str(get_future_name[0]))
+                find_task_state = 3
     
     # State 3
     elif find_task_state == 3: 
