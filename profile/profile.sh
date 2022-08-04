@@ -9,7 +9,7 @@ else
         mv ./dumped_data.txt ./profile/
         cd ./profile
         echo "Start parsing.."
-        if [ "$3" = "--generated-future"]
+        if [ "$3" = "--generated-future" ]
         then
             echo "(Tracing compiler-generated futures only)" 
             python3 parser_nu.py $1 $2
@@ -17,7 +17,7 @@ else
         then
             echo "(Tracing all futures, get locations for futures)"
             python3 parser.py $1 $2 --get-location
-        elif ([ "$3" = "--generated-future" ] && ["$4" = "--get-location" ]) || ([ "$3" = "--get-location" ] && [ "$4" = "--generated-future" ] )
+        elif ([ "$3" = "--generated-future" ] && [ "$4" = "--get-location" ]) || ([ "$3" = "--get-location" ] && [ "$4" = "--generated-future" ] )
         then
             echo "(Tracing compiler-generated futures only, get locations for futures)"
             python3 parser_nu.py $1 $2 --get-location
