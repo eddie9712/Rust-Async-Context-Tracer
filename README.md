@@ -64,7 +64,7 @@ Tracing the compiler generated futures only:
  * Some locations information are wrong because of the same demangled symbol 
  
  ## Acknowledgement:
- This work was sponsored by the internship of ADLINK during 2021-2022
+ This work was sponsored by the internship of [ADLINK](https://www.adlinktech.com/) during 2021-2022
  
  ## License:
  * MIT license (http://opensource.org/licenses/MIT)
