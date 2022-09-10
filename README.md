@@ -62,6 +62,10 @@ Tracing the compiler generated futures only:
  * Annotate different tasks with different colors
  * Tracing progress should be done correctly in release mode
  * Some locations information are wrong because of the same demangled symbol 
+ 
+ ## Acknowledgement:
+ This work was sponsored by the internship of [ADLINK](https://www.adlinktech.com/) during 2021-2022.
+ 
  ## License:
  * MIT license (http://opensource.org/licenses/MIT)
  
